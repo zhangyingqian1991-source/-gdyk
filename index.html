@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>孤独症行为评定量表 (ABC) 评估工具</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1, h2 { color: #2c3e50; text-align: center; }
+        .instruction { font-size: 0.9em; color: #666; border-left: 4px solid #3498db; padding-left: 15px; margin-bottom: 20px; }
+        .item { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .item-text { flex: 1; padding-right: 15px; }
+        .checkbox-wrapper { display: flex; align-items: center; min-width: 60px; justify-content: flex-end; }
+        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+        .footer { text-align: center; padding: 30px; }
+        button { background: #3498db; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1em; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #2980b9; }
+        #report { display: none; border-top: 3px solid #3498db; }
+        .score-box { display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 20px; }
+        .score-item { text-align: center; margin: 10px; padding: 15px; background: #f8f9fa; border-radius: 8px; flex: 1; min-width: 120px; }
+        .high-risk { color: #e74c3c; font-weight: bold; }
+        .medium-risk { color: #f39c12; font-weight: bold; }
+        .low-risk { color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>ABC量表测评</h1>
+    <div class="instruction">
+        <strong>填写说明：</strong><br>
+        1. 请结合儿童近1个月内的日常行为表现进行判断 [cite: 5, 16]。<br>
+        2. 只要存在该项表现即勾选，无论轻重 [cite: 6, 16]。建议该行为每周至少出现2-3次 [cite: 16]。<br>
+        3. 结果仅供参考，不构成临床诊断结论 [cite: 7]。
+    </div>
+    
+    <div id="form-container">
+        </div>
+
+    <div class="footer">
+        <button onclick="generateReport()">提交评估</button>
+    </div>
+</div>
+
+<div id="report" class="card">
+    <h2>评估报告</h2>
+    <div id="report-content"></div>
+    <div class="footer">
+        <button onclick="window.print()">保存/打印报告</button>
+        <button onclick="location.reload()" style="background:#95a5a6;">重新测评</button>
+    </div>
+</div>
+
+<script>
+// 量表数据：[题目, 维度(S/R/B/L/S2), 分值]
+const abcData = [
+    ["1.喜欢长时间的自身旋转", "B", 4], ["2.学会做一件简单的事，但是很快就“忘记”", "S2", 2],
+    ["3.经常没有接触环境或进行交往的要求", "S", 4], ["4.往往不能接受简单的指令", "L", 1],
+    ["5.不会玩玩具等(如没完没了地转动或乱扔)", "B", 2], ["6.视觉辨别能力差", "S", 2],
+    ["7.无交往性微笑", "R", 2], ["8.代词运用的顺倒或混乱", "L", 3],
+    ["9.长时间的总拿着某件东西", "B", 3], ["10.似乎不在听人说话，以致怀疑有听力问题", "S", 3],
+    ["11.说话无抑扬顿挫、无节奏", "L", 4], ["12.长时间的摇摆身体", "B", 4],
+    ["13.对自身与物体距离估计不足", "R", 2], ["14.对环境和规律改变产生强烈反应", "S2", 3],
+    ["15.对呼唤名字无反应", "L", 2], ["16.经常做出前冲、脚尖行走、手指轻弹等动作", "B", 4],
+    ["17.对其他人的面部表情或情感没有反应", "R", 3], ["18.说话时很少用“是”或“我”等词", "L", 2],
+    ["19.有某一方面的特殊能力，与智力不符", "S2", 4], ["20.不能执行简单的含有介词的指令", "L", 1],
+    ["21.有时对很大的声音不产生吃惊反应", "S", 3], ["22.经常拍打手", "B", 4],
+    ["23.发大脾气或经常发点脾气", "S2", 3], ["24.主动回避与别人进行眼光接触", "R", 4],
+    ["25.拒绝别人接触或拥抱", "R", 4], ["26.有时对很痛苦的刺激无反应", "S", 3],
+    ["27.身体表现很僵硬很难抱住", "R", 3], ["28.肌肉松弛，不紧贴着抱他的人", "R", 2],
+    ["29.以姿势、手势表示渴望得到的东西", "L", 2], ["30.常用脚尖走路", "B", 2],
+    ["31.用咬人、撞人、踢人等来伤害他人", "S2", 2], ["32.不断地重复短句", "L", 3],
+    ["33.游戏时不模仿其他儿童", "R", 3], ["34.强光照射眼睛时常常不眨眼", "S", 1],
+    ["35.以撞头、咬手等行为来自伤", "B", 2], ["36.想要什么东西不能等待", "S2", 2],
+    ["37.不能指出5个以上物体的名称", "L", 1], ["38.不能发展任何友谊", "R", 4],
+    ["39.有许多声音的时候常常盖着耳朵", "S", 4], ["40.经常旋转碰撞物体", "B", 4],
+    ["41.在训练大小便方面有困难", "S2", 1], ["42.一天只能提出5个以内的要求", "L", 2],
+    ["43.经常受到惊吓或非常焦虑", "R", 3], ["44.在正常光线下斜眼、闭眼、皱眉", "S", 3],
+    ["45.不会自己穿衣", "S2", 1], ["46.一遍一遍重复一些声音或词", "L", 3],
+    ["47.瞪着眼看人，好象要“看穿”似的", "R", 4], ["48.重复别人的问话和回答", "L", 4],
+    ["49.不能意识环境，对危险情况不在意", "S2", 2], ["50.特别着迷于单调的东西或游戏", "S2", 4],
+    ["51.喜欢触摸、嗅和/或尝东西", "B", 3], ["52.对生人常无视觉反应", "S", 3],
+    ["53.纠缠在一些复杂的仪式行为上", "B", 4], ["54.经常毁坏东西", "B", 2],
+    ["55.二岁半以前发现发育延迟", "S2", 1], ["56.仅会用15-30个短句交往", "L", 3],
+    ["57.长期凝视一个地方(发呆)", "S", 4]
+];
+
+// 渲染题目
+const container = document.getElementById('form-container');
+abcData.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+        <div class="item-text">${item[0]}</div>
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="q${index}" data-type="${item[1]}" data-score="${item[2]}">
+        </div>
+    `;
+    container.appendChild(div);
+});
+
+function generateReport() {
+    let scores = { S: 0, R: 0, B: 0, L: 0, S2: 0, total: 0 };
+    
+    abcData.forEach((_, index) => {
+        const cb = document.getElementById(`q${index}`);
+        if (cb.checked) {
+            const s = parseInt(cb.dataset.score);
+            const type = cb.dataset.type;
+            scores[type] += s;
+            scores.total += s;
+        }
+    });
+
+    let status = "";
+    let statusClass = "";
+    let suggestion = "";
+
+    // 判定逻辑 
+    if (scores.total >= 62) {
+        status = "高度怀疑患有自闭症";
+        statusClass = "high-risk";
+        suggestion = "得分已达到临床诊断参考线，建议立即咨询专业精神科医生进行深入评估。";
+    } else if (scores.total >= 31) {
+        status = "疑似患有自闭症";
+        statusClass = "medium-risk";
+        suggestion = "得分处于筛查预警范围内，建议前往专业机构进行进一步排查。";
+    } else {
+        status = "在正常筛查范围内";
+        statusClass = "low-risk";
+        suggestion = "目前得分未达到自闭症筛查阈值，请继续观察儿童日常行为表现。";
+    }
+
+    const reportHTML = `
+        <div style="text-align:center;">
+            <p>评估总分：<span style="font-size:2em;" class="${statusClass}">${scores.total}</span> 分</p>
+            <h3 class="${statusClass}">${status}</h3>
+        </div>
+        <div class="score-box">
+            <div class="score-item">感觉(S): ${scores.S}分</div>
+            <div class="score-item">交往(R): ${scores.R}分</div>
+            <div class="score-item">运动(B): ${scores.B}分</div>
+            <div class="score-item">语言(L): ${scores.L}分</div>
+            <div class="score-item">生活自理(S2): ${scores.S2}分</div>
+        </div>
+        <div style="margin-top:20px; padding:15px; background:#eef; border-radius:8px;">
+            <strong>专业建议：</strong> ${suggestion}
+        </div>
+        <p style="font-size:0.8em; color:#888; margin-top:15px;">
+            * 注：本工具依据《孤独症行为评定量表（ABC量表）》标准开发。评估结果仅供参考，确诊需由医生结合临床表现判定 [cite: 7, 15]。
+        </p>
+    `;
+
+    document.getElementById('report-content').innerHTML = reportHTML;
+    document.getElementById('report').style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+}
+</script>
+
+</body>
+</html>
