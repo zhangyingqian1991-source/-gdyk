@@ -3,160 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>孤独症行为评定量表 (ABC) 评估工具</title>
+    <title>孤独症行为评定量表 (ABC)</title>
     <style>
-        body { font-family: -apple-system, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h1, h2 { color: #2c3e50; text-align: center; }
-        .instruction { font-size: 0.9em; color: #666; border-left: 4px solid #3498db; padding-left: 15px; margin-bottom: 20px; }
-        .item { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .item-text { flex: 1; padding-right: 15px; }
-        .checkbox-wrapper { display: flex; align-items: center; min-width: 60px; justify-content: flex-end; }
-        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
-        .footer { text-align: center; padding: 30px; }
-        button { background: #3498db; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1em; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #2980b9; }
-        #report { display: none; border-top: 3px solid #3498db; }
-        .score-box { display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 20px; }
-        .score-item { text-align: center; margin: 10px; padding: 15px; background: #f8f9fa; border-radius: 8px; flex: 1; min-width: 120px; }
-        .high-risk { color: #e74c3c; font-weight: bold; }
-        .medium-risk { color: #f39c12; font-weight: bold; }
-        .low-risk { color: #27ae60; font-weight: bold; }
+        :root {
+            --primary-blue: #2c7be5;
+            --secondary-blue: #f5f9ff;
+            --accent-blue: #e3efff;
+            --text-dark: #12263f;
+            --text-muted: #6e84a3;
+            --border-color: #e3ebf6;
+            --risk-red: #e63757;
+            --risk-orange: #fd7e14;
+        }
+
+        body { 
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
+            line-height: 1.6; 
+            color: var(--text-dark); 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 30px 15px; 
+            background-color: #f9fbfd; 
+        }
+
+        .card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 16px; 
+            box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03); 
+            margin-bottom: 25px; 
+            border: 1px solid var(--border-color);
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 700; text-align: center; margin-bottom: 30px; letter-spacing: -0.02em; color: var(--primary-blue); }
+        
+        /* 整合填写说明的样式 */
+        .instruction-box { 
+            background-color: #fffdf5; 
+            border: 1px solid #ffeeba; 
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-bottom: 35px; 
+            font-size: 0.95rem; 
+            line-height: 1.8;
+            color: #5d4037;
+        }
+        .salutation { font-weight: bold; font-size: 1.1rem; margin-bottom: 12px; color: #856404; }
+        .red-alert { color: var(--risk-red); font-weight: bold; }
+
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+            background: var(--secondary-blue);
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .info-item label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        .info-item input { 
+            width: 100%; border: 1px solid var(--border-color); 
+            padding: 10px; border-radius: 8px; box-sizing: border-box; 
+            transition: border-color 0.2s;
+        }
+
+        .item { 
+            display: flex; align-items: center; padding: 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            transition: all 0.2s ease; cursor: pointer; border-radius: 8px; margin-bottom: 2px;
+        }
+        .item:hover { background-color: var(--secondary-blue); }
+        .item.selected { background-color: var(--accent-blue); }
+        .item-text { flex: 1; padding-right: 20px; font-size: 1rem; }
+
+        input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary-blue); }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, #2c7be5 0%, #1a68d1 100%); 
+            color: white; border: none; padding: 16px 50px; border-radius: 12px; 
+            font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(44, 123, 229, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(44, 123, 229, 0.4); }
+
+        #report { display: none; border-top: 8px solid var(--primary-blue); }
+        .score-circle { 
+            width: 130px; height: 130px; border-radius: 50%; margin: 0 auto 20px; 
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            border: 5px solid var(--primary-blue);
+        }
+        .score-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 25px 0; }
+        .score-item { background: var(--secondary-blue); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border-color); }
+        .score-val { display: block; font-size: 1.4rem; font-weight: bold; }
+
+        @media print { .btn-primary, .instruction-box, .info-item input { display: none; } body { padding: 0; } .card { box-shadow: none; border: 1px solid #eee; } }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h1>ABC量表测评</h1>
-    <div class="instruction">
-        <strong>填写说明：</strong><br>
-        1. 请结合儿童近1个月内的日常行为表现进行判断 [cite: 5, 16]。<br>
-        2. 只要存在该项表现即勾选，无论轻重 [cite: 6, 16]。建议该行为每周至少出现2-3次 [cite: 16]。<br>
-        3. 结果仅供参考，不构成临床诊断结论 [cite: 7]。
+    <h1>孤独症行为评定量表 (ABC)</h1>
+    
+    <div class="instruction-box">
+        <div class="salutation">尊敬的家长：您好！</div>
+        <div class="instruction-content">
+            <p>现将《孤独症行为评定量表（ABC量表）》提供予您，请您参照以下要求完成填写：</p>
+            <p>1. 请结合儿童<strong>近1个月内</strong>的日常行为表现，对量表中57个项目逐一判断：若儿童存在该项表现，请在对应项处点击勾选（系统会自动记录分数）；若无该项表现，则不做标记。请勿遗漏任何项目。<span class="red-alert">（每次入院时均需填写）</span></p>
+            <p>2. 本量表为孤独症儿童行为特征的辅助筛查工具，评分规则为：项目对应的分数为固定分值，<strong>无论症状表现轻重，只要存在该项行为即计对应分数</strong>。</p>
+            <p style="border-top: 1px dashed #ffeeba; margin-top: 15px; padding-top: 15px; font-size: 0.92rem; color: #795548;">
+                <strong>请注意：</strong>本量表为孤独症儿童行为表现的辅助评估工具，其结果仅作为参考性总结，不构成临床诊断结论。请您认真、如实填写，完成后可请专业医生或康复人员对结果进行解读，以便更全面地判断儿童状态。感谢您的配合！
+            </p>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-item"><label>姓名</label><input type="text" id="p-name" placeholder="请输入姓名"></div>
+        <div class="info-item"><label>性别</label><input type="text" placeholder="男/女"></div>
+        <div class="info-item"><label>年龄</label><input type="text" placeholder="岁/月"></div>
+        <div class="info-item"><label>填表人关系</label><input type="text" placeholder="如：母亲"></div>
     </div>
     
-    <div id="form-container">
-        </div>
+    <div id="form-container"></div>
 
-    <div class="footer">
-        <button onclick="generateReport()">提交评估</button>
+    <div style="text-align: center; margin-top: 40px;">
+        <button class="btn-primary" onclick="generateReport()">生成评估报告</button>
     </div>
 </div>
 
 <div id="report" class="card">
-    <h2>评估报告</h2>
+    <h2 style="text-align: center; margin-top: 0;">评估结果报告</h2>
     <div id="report-content"></div>
-    <div class="footer">
-        <button onclick="window.print()">保存/打印报告</button>
-        <button onclick="location.reload()" style="background:#95a5a6;">重新测评</button>
+    <div style="text-align: center; margin-top: 30px;">
+        <button class="btn-primary" style="padding: 10px 30px; font-size: 0.9rem;" onclick="window.print()">打印报告</button>
+        <button style="background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; margin-left: 20px;" onclick="location.reload()">重新测评</button>
     </div>
 </div>
 
 <script>
-// 量表数据：[题目, 维度(S/R/B/L/S2), 分值]
+// ABC量表标准数据及分值
 const abcData = [
-    ["1.喜欢长时间的自身旋转", "B", 4], ["2.学会做一件简单的事，但是很快就“忘记”", "S2", 2],
-    ["3.经常没有接触环境或进行交往的要求", "S", 4], ["4.往往不能接受简单的指令", "L", 1],
-    ["5.不会玩玩具等(如没完没了地转动或乱扔)", "B", 2], ["6.视觉辨别能力差", "S", 2],
-    ["7.无交往性微笑", "R", 2], ["8.代词运用的顺倒或混乱", "L", 3],
-    ["9.长时间的总拿着某件东西", "B", 3], ["10.似乎不在听人说话，以致怀疑有听力问题", "S", 3],
-    ["11.说话无抑扬顿挫、无节奏", "L", 4], ["12.长时间的摇摆身体", "B", 4],
-    ["13.对自身与物体距离估计不足", "R", 2], ["14.对环境和规律改变产生强烈反应", "S2", 3],
-    ["15.对呼唤名字无反应", "L", 2], ["16.经常做出前冲、脚尖行走、手指轻弹等动作", "B", 4],
-    ["17.对其他人的面部表情或情感没有反应", "R", 3], ["18.说话时很少用“是”或“我”等词", "L", 2],
-    ["19.有某一方面的特殊能力，与智力不符", "S2", 4], ["20.不能执行简单的含有介词的指令", "L", 1],
-    ["21.有时对很大的声音不产生吃惊反应", "S", 3], ["22.经常拍打手", "B", 4],
-    ["23.发大脾气或经常发点脾气", "S2", 3], ["24.主动回避与别人进行眼光接触", "R", 4],
-    ["25.拒绝别人接触或拥抱", "R", 4], ["26.有时对很痛苦的刺激无反应", "S", 3],
-    ["27.身体表现很僵硬很难抱住", "R", 3], ["28.肌肉松弛，不紧贴着抱他的人", "R", 2],
-    ["29.以姿势、手势表示渴望得到的东西", "L", 2], ["30.常用脚尖走路", "B", 2],
-    ["31.用咬人、撞人、踢人等来伤害他人", "S2", 2], ["32.不断地重复短句", "L", 3],
-    ["33.游戏时不模仿其他儿童", "R", 3], ["34.强光照射眼睛时常常不眨眼", "S", 1],
-    ["35.以撞头、咬手等行为来自伤", "B", 2], ["36.想要什么东西不能等待", "S2", 2],
-    ["37.不能指出5个以上物体的名称", "L", 1], ["38.不能发展任何友谊", "R", 4],
-    ["39.有许多声音的时候常常盖着耳朵", "S", 4], ["40.经常旋转碰撞物体", "B", 4],
-    ["41.在训练大小便方面有困难", "S2", 1], ["42.一天只能提出5个以内的要求", "L", 2],
-    ["43.经常受到惊吓或非常焦虑", "R", 3], ["44.在正常光线下斜眼、闭眼、皱眉", "S", 3],
-    ["45.不会自己穿衣", "S2", 1], ["46.一遍一遍重复一些声音或词", "L", 3],
-    ["47.瞪着眼看人，好象要“看穿”似的", "R", 4], ["48.重复别人的问话和回答", "L", 4],
-    ["49.不能意识环境，对危险情况不在意", "S2", 2], ["50.特别着迷于单调的东西或游戏", "S2", 4],
-    ["51.喜欢触摸、嗅和/或尝东西", "B", 3], ["52.对生人常无视觉反应", "S", 3],
-    ["53.纠缠在一些复杂的仪式行为上", "B", 4], ["54.经常毁坏东西", "B", 2],
-    ["55.二岁半以前发现发育延迟", "S2", 1], ["56.仅会用15-30个短句交往", "L", 3],
-    ["57.长期凝视一个地方(发呆)", "S", 4]
+    ["1. 喜欢长时间的自身旋转", "B", 4], ["2. 学会做一件简单的事，但是很快就“忘记”", "S2", 2],
+    ["3. 经常没有接触环境或进行交往的要求", "S", 4], ["4. 往往不能接受简单的指令(如坐下、来这儿等)", "L", 1],
+    ["5. 不会玩玩具等(如没完没了地转动或乱扔、揉等)", "B", 2], ["6. 视觉辨别能力差(大小、颜色等)", "S", 2],
+    ["7. 无交往性微笑(不会与人点头、招呼)", "R", 2], ["8. 代词运用的顺倒或混乱(如你我不分)", "L", 3],
+    ["9. 长时间的总拿着某件东西", "B", 3], ["10. 似乎不在听人说话，怀疑有听力问题", "S", 3],
+    ["11. 说话无抑扬顿挫、无节奏", "L", 4], ["12. 长时间的摇摆身体", "B", 4],
+    ["13. 对自身与物体距离估计不足", "R", 2], ["14. 对环境和日常生活规律改变反应强烈", "S2", 3],
+    ["15. 对呼唤名字无反应", "L", 2], ["16. 经常前冲、脚尖行走、手指轻弹", "B", 4],
+    ["17. 对他人的面部表情或情感没有反应", "R", 3], ["18. 说话时很少用“是”或“我”等词", "L", 2],
+    ["19. 有某方面特殊能力，与智力低下不符", "S2", 4], ["20. 不能执行简单的含有介词的指令", "L", 1],
+    ["21. 对很大的声音不产生吃惊反应", "S", 3], ["22. 经常拍打手", "B", 4],
+    ["23. 发大脾气或经常发点脾气", "S2", 3], ["24. 主动回避与别人进行眼光接触", "R", 4],
+    ["25. 拒绝别人接触或拥抱", "R", 4], ["26. 对很痛苦的刺激无反应", "S", 3],
+    ["27. 身体表现很僵硬很难抱住", "R", 3], ["28. 肌肉松弛(不紧贴着抱他的人)", "R", 2],
+    ["29. 以姿势、手势表示渴望得到的东西", "L", 2], ["30. 常用脚尖走路", "B", 2],
+    ["31. 用咬人、撞人等来伤害他人", "S2", 2], ["32. 不断地重复短句", "L", 3],
+    ["33. 游戏时不模仿其他儿童", "R", 3], ["34. 强光照射眼睛时常常不眨眼", "S", 1],
+    ["35. 以撞头、咬手等行为来自伤", "B", 2], ["36. 想要什么东西不能等待", "S2", 2],
+    ["37. 不能指出5个以上物体的名称", "L", 1], ["38. 不能发展任何友谊", "R", 4],
+    ["39. 声音多时常盖着耳朵", "S", 4], ["40. 经常旋转碰撞物体", "B", 4],
+    ["41. 训练大小便方面有困难", "S2", 1], ["42. 一天只能提出5个以内的要求", "L", 2],
+    ["43. 经常受到惊吓或非常焦虑", "R", 3], ["44. 正常光线下斜眼、皱眉", "S", 3],
+    ["45. 不经常帮助的话不会自己穿衣", "S2", 1], ["46. 重复一些声音或词", "L", 3],
+    ["47. 瞪着眼看人，好像要“看穿”似的", "R", 4], ["48. 重复别人的问话和回答", "L", 4],
+    ["49. 不能意识环境，对危险不在意", "S2", 2], ["50. 迷恋单调游戏(如来回跑跳)", "S2", 4],
+    ["51. 对周围东西喜欢触摸、嗅、尝", "B", 3], ["52. 对生人常无视觉反应", "S", 3],
+    ["53. 纠缠在一些复杂的仪式行为上", "B", 4], ["54. 经常毁坏东西", "B", 2],
+    ["55. 二岁半以前发现发育延迟", "S2", 1], ["56. 仅会用15-30个短句交往", "L", 3],
+    ["57. 长期凝视一个地方发呆", "S", 4]
 ];
 
-// 渲染题目
 const container = document.getElementById('form-container');
 abcData.forEach((item, index) => {
     const div = document.createElement('div');
     div.className = 'item';
+    div.onclick = function(e) {
+        if(e.target.type !== 'checkbox') {
+            const cb = this.querySelector('input');
+            cb.checked = !cb.checked;
+            this.classList.toggle('selected', cb.checked);
+        } else {
+            this.classList.toggle('selected', e.target.checked);
+        }
+    };
     div.innerHTML = `
         <div class="item-text">${item[0]}</div>
-        <div class="checkbox-wrapper">
-            <input type="checkbox" id="q${index}" data-type="${item[1]}" data-score="${item[2]}">
-        </div>
+        <input type="checkbox" id="q${index}" data-type="${item[1]}" data-score="${item[2]}">
     `;
     container.appendChild(div);
 });
 
 function generateReport() {
+    const name = document.getElementById('p-name').value || "孩子";
     let scores = { S: 0, R: 0, B: 0, L: 0, S2: 0, total: 0 };
-    
     abcData.forEach((_, index) => {
         const cb = document.getElementById(`q${index}`);
         if (cb.checked) {
-            const s = parseInt(cb.dataset.score);
-            const type = cb.dataset.type;
-            scores[type] += s;
-            scores.total += s;
+            scores[cb.dataset.type] += parseInt(cb.dataset.score);
+            scores.total += parseInt(cb.dataset.score);
         }
     });
 
-    let status = "";
-    let statusClass = "";
-    let suggestion = "";
 
-    // 判定逻辑 
+
+   // 定义结果变量
+    let status = "";
+    let color = "";
+    let parentNote = "";
+
+    // 分数逻辑判断 
     if (scores.total >= 62) {
-        status = "高度怀疑患有自闭症";
-        statusClass = "high-risk";
-        suggestion = "得分已达到临床诊断参考线，建议立即咨询专业精神科医生进行深入评估。";
+        status = "测评表现已达到临床辅助诊断界值";
+        color = "#e63757"; // 红色风险
+        parentNote = `
+            <p><strong>目前的测评得分提示孩子面临较大的成长挑战。</strong>请您保持冷静，分数只是协助我们精准理解孩子行为的一扇窗，而非最终结论。建议您尽快预约专业康复团队进行全方位的评估，通过科学的早期干预，每个孩子都有机会开启属于自己的潜力之窗。</p>
+            <p>在这个过程中，您的理解、接纳与坚持是孩子最坚实的底色。请关注得分较高的维度，我们将协助您制定针对性的支持计划。</p>
+        `;
     } else if (scores.total >= 31) {
-        status = "疑似患有自闭症";
-        statusClass = "medium-risk";
-        suggestion = "得分处于筛查预警范围内，建议前往专业机构进行进一步排查。";
+        status = "表现具有一定的孤独症相关倾向";
+        color = "#fd7e14"; // 橙色警示
+        parentNote = `
+            <p><strong>当前的得分反映出孩子在某些行为领域存在波动。</strong>这并不意味着确诊，而是一个温暖的提醒，提示我们需要在日常生活中给予孩子更多的专业关注与行为引导。建议保持规律的日常观察，并配合必要的社交或语言强化训练。</p>
+            <p>请保持耐心与信心，关注孩子点滴的进步。您可以重点加强交往能力(R)和语言能力(L)的互动，在充满爱意的环境里陪伴孩子跨越成长的障碍。</p>
+        `;
     } else {
-        status = "在正常筛查范围内";
-        statusClass = "low-risk";
-        suggestion = "目前得分未达到自闭症筛查阈值，请继续观察儿童日常行为表现。";
+        status = "测评表现目前处于正常参考范围内";
+        color = "#2c7be5"; // 蓝色安全
+        parentNote = `
+            <p><strong>目前的测评得分处于健康的参考区间。</strong>这意味着孩子在本次观察周期内的行为表现符合发育常规。请继续保持高质量的亲子互动，为孩子营造多元化的社交与感知探索空间。</p>
+            <p>每个孩子的成长节律各有千秋，持续的关注与科学的陪伴是孩子茁壮成长最好的土壤。若未来发现任何令您担心的行为变化，欢迎随时再次评估。</p>
+        `;
     }
 
     const reportHTML = `
-        <div style="text-align:center;">
-            <p>评估总分：<span style="font-size:2em;" class="${statusClass}">${scores.total}</span> 分</p>
-            <h3 class="${statusClass}">${status}</h3>
+        <div class="score-circle" style="border-color: ${color}">
+            <span style="font-size: 0.9rem; color: #6e84a3;">测评总分</span>
+            <span style="font-size: 2.2rem; font-weight: 800; color: ${color}">${scores.total}</span>
         </div>
+        <h3 style="text-align:center; color:${color}; margin-bottom:10px;">评估结论：${status}</h3>
+        <p style="text-align:center; color:#6e84a3; font-size:0.9rem; margin-bottom:30px;">（本测评仅代表当前行为观察，不作为最终医学诊断依据）</p>
+        
         <div class="score-box">
-            <div class="score-item">感觉(S): ${scores.S}分</div>
-            <div class="score-item">交往(R): ${scores.R}分</div>
-            <div class="score-item">运动(B): ${scores.B}分</div>
-            <div class="score-item">语言(L): ${scores.L}分</div>
-            <div class="score-item">生活自理(S2): ${scores.S2}分</div>
+            <div class="score-item"><span class="score-val" style="color:${color}">${scores.S}</span>感觉能力(S)</div>
+            <div class="score-item"><span class="score-val" style="color:${color}">${scores.R}</span>交往能力(R)</div>
+            <div class="score-item"><span class="score-val" style="color:${color}">${scores.B}</span>运动能力(B)</div>
+            <div class="score-item"><span class="score-val" style="color:${color}">${scores.L}</span>语言能力(L)</div>
+            <div class="score-item"><span class="score-val" style="color:${color}">${scores.S2}</span>自理能力(S2)</div>
         </div>
-        <div style="margin-top:20px; padding:15px; background:#eef; border-radius:8px;">
-            <strong>专业建议：</strong> ${suggestion}
-        </div>
-        <p style="font-size:0.8em; color:#888; margin-top:15px;">
-            * 注：本工具依据《孤独症行为评定量表（ABC量表）》标准开发。评估结果仅供参考，确诊需由医生结合临床表现判定 [cite: 7, 15]。
-        </p>
-    `;
 
+        <div style="background:#f0f7ff; padding:25px; border-radius:15px; border:1px solid #d0e3ff; font-size:0.98rem; line-height:1.8; color: #344767;">
+            <p style="margin-top:0; font-size:1.1rem;"><strong>致家长：</strong></p>
+            <p>
+                测评显示，<strong>${name}</strong> 本次的得分反映了当下的行为轨迹。每一个孩子都是独一无二的奇迹，分数的起伏只是他成长路上的微小注脚，旨在帮助我们更深地走进他的内心世界。
+            </p>
+            <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 10px; border-left: 4px solid ${color};">
+                <strong>核心数据解析与建议：</strong>
+                ${parentNote}
+            </div>
+            <p style="margin-bottom:0; color:#4a5568; font-style: italic;">
+                “早期科学的干预与您充满爱心的陪伴，是孩子进步最有力的支柱。”
+            </p>
+        </div>
+    `;
     document.getElementById('report-content').innerHTML = reportHTML;
     document.getElementById('report').style.display = 'block';
-    window.scrollTo(0, document.body.scrollHeight);
+    window.scrollTo({ top: document.getElementById('report').offsetTop - 20, behavior: 'smooth' });
 }
 </script>
-
 </body>
 </html>
